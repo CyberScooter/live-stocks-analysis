@@ -1,0 +1,24 @@
+services:
+  app:
+    build: .
+    image: stock-analysis:latest
+    container_name: stock-analysis
+    restart: unless-stopped
+    env_file: .env            # needs FINNHUB_API_KEY
+    environment:
+      HOST: 0.0.0.0           # listen inside the container...
+      PORT: 5174
+    ports:
+      # Default: only reachable from the server itself (use Tailscale serve or Caddy in front).
+      # Set BIND_ADDRESS=0.0.0.0 in .env to open it to your network, or to a specific IP
+      # (e.g. the server's Tailscale 100.x address) to listen only there.
+      - "${BIND_ADDRESS:-127.0.0.1}:5174:5174"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -1,0 +1,24 @@
+[Unit]
+Description=Stock Analysis app
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=stockapp
+WorkingDirectory=/opt/stock-analysis
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/stock-analysis/.env
+ExecStart=/usr/bin/node server/index.js
+Restart=always
+RestartSec=5
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadOnlyPaths=/opt/stock-analysis
+
+[Install]
+WantedBy=multi-user.target

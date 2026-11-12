@@ -1,0 +1,8 @@
+# Replace stocks.example.com with your domain (its DNS must point at this server).
+# Generate the password hash with:  caddy hash-password
+stocks.example.com {
+	basic_auth {
+		me <paste-hash-here>
+	}
+	reverse_proxy 127.0.0.1:5174
+}
