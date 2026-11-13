@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Your own buy prices, kept in this browser only (localStorage).
- * Shape: { [symbol]: { price, shares|null, date 'YYYY-MM-DD'|null, currency|null, target|null } }
+ * Shape: { [symbol]: { price, shares|null, date 'YYYY-MM-DD'|null, currency|null } }
  */
 const KEY = 'positions';
 
@@ -24,13 +24,11 @@ export function sanitize(input) {
     const price = Number(p?.price);
     if (!Number.isFinite(price) || price <= 0) continue;
     const shares = p.shares == null || p.shares === '' ? null : Number(p.shares);
-    const target = p.target == null || p.target === '' ? null : Number(p.target);
     out[symbol] = {
       price,
       shares: Number.isFinite(shares) && shares > 0 ? shares : null,
       date: /^\d{4}-\d{2}-\d{2}$/.test(p.date || '') ? p.date : null,
       currency: typeof p.currency === 'string' ? p.currency.slice(0, 5) : null,
-      target: Number.isFinite(target) && target > 0 ? target : null, // price you hope it reaches
     };
   }
   return out;
@@ -114,20 +112,20 @@ export function positionStats(pos, price, rateNow = 1, rateBuy = rateNow) {
 }
 
 /**
- * What the position would be worth if the price reached `pos.target`.
- * The target is converted at today's rate (future exchange rates are unknown),
+ * What the position would be worth if the price reached `targetPrice` (in the
+ * stock's own currency). Nothing is saved; it's a what-if. The target is converted at today's rate (future exchange rates are unknown),
  * the cost at the buy-date rate, same as positionStats.
  */
-export function projectionStats(pos, price, rateNow = 1, rateBuy = rateNow) {
-  if (!pos?.target || price == null) return null;
+export function projectionStats(pos, targetPrice, price, rateNow = 1, rateBuy = rateNow) {
+  if (!pos || price == null || !Number.isFinite(targetPrice) || targetPrice <= 0) return null;
   const buy = pos.price * rateBuy;
   const now = price * rateNow;
-  const target = pos.target * rateNow;
+  const target = targetPrice * rateNow;
   const shares = pos.shares;
   return {
     target,
-    reached: price >= pos.target,
-    movePct: (pos.target / price - 1) * 100, // from today's price to the target
+    reached: price >= targetPrice,
+    movePct: (targetPrice / price - 1) * 100, // from today's price to the target
     returnPct: (target / buy - 1) * 100, // total return on what you paid
     perShare: target - buy,
     profit: shares ? shares * (target - buy) : null,

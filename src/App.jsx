@@ -3,6 +3,7 @@ import Search from './components/Search.jsx';
 import StockView from './components/StockView.jsx';
 import MarketNews from './components/MarketNews.jsx';
 import MyStocks from './components/MyStocks.jsx';
+import TopRated from './components/TopRated.jsx';
 import { usePositions } from './positions.js';
 import { useDisplayCurrency } from './currency.js';
 
@@ -88,6 +89,9 @@ export default function App() {
           <button className={view === 'mine' ? 'active' : ''} onClick={() => setView('mine')}>
             My stocks
           </button>
+          <button className={view === 'top' ? 'active' : ''} onClick={() => setView('top')}>
+            Strong buys
+          </button>
           <button className={view === 'market' ? 'active' : ''} onClick={() => setView('market')}>
             Market news
           </button>
@@ -114,6 +118,8 @@ export default function App() {
           <h2>Market news</h2>
           <MarketNews onOpenStock={open} />
         </section>
+      ) : view === 'top' ? (
+        <TopRated onOpenStock={open} />
       ) : view === 'mine' ? (
         <MyStocks positions={positions} onOpenStock={open} onImport={importData} displayMode={displayMode} />
       ) : (

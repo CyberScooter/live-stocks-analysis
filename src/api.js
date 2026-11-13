@@ -21,4 +21,5 @@ export const api = {
   quotes: (symbols) => getJson(`/api/quotes?symbols=${enc(symbols.join(','))}`),
   news: (symbol) => getJson(`/api/news/${enc(symbol)}`),
   marketNews: () => getJson('/api/market-news'),
+  topRated: () => getJson('/api/top-rated'),
 };

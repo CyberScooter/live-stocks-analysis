@@ -3,6 +3,7 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import WebSocket from 'ws';
+import { createTopRated } from './topRated.js';
 
 const PORT = Number(process.env.PORT) || 5174;
 // Only reachable from this machine by default; put a reverse proxy (Tailscale, Caddy) in front.
@@ -643,6 +644,9 @@ app.get('/api/stream', (req, res) => {
 // ---------------------------------------------------------------------------
 // Errors + static build
 // ---------------------------------------------------------------------------
+
+// Strong buys by sector (analyst consensus over a fixed list of large US stocks)
+app.get('/api/top-rated', createTopRated({ finnhub, cached }));
 
 app.use('/api', (_req, _res, next) => next(new HttpError(404, 'Not found')));
 

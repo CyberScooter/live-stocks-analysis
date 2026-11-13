@@ -192,11 +192,12 @@ h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: v
 .position-hero { display: flex; gap: 32px; flex-wrap: wrap; margin-bottom: 12px; }
 .hero-value { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .projection { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.target-field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; max-width: 240px; margin-bottom: 12px; }
 .sub-title { margin: 0 0 10px; font-size: 14px; font-weight: 600; }
 .position-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 16px; }
 .position-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
-.position-form input { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; font: inherit; }
-.position-form input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.position-form input, .target-field input { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; font: inherit; }
+.position-form input:focus, .target-field input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .position-form .btn-row, .position-form > p { grid-column: 1 / -1; margin: 0; }
 .range-cost { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 3px; height: 20px; border-radius: 2px; background: var(--accent); }
 .price-chart .cost-line { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 6 4; }
@@ -285,3 +286,77 @@ body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
 .chart-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 30px; margin-bottom: 4px; flex-wrap: wrap; }
 .price-chart { cursor: crosshair; user-select: none; -webkit-user-select: none; }
 .price-chart .selection { fill: var(--accent); fill-opacity: .15; stroke: var(--accent); stroke-opacity: .6; stroke-width: 1; }
+
+/* Strong buys tab */
+.toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.toggle input { accent-color: var(--accent); width: 16px; height: 16px; }
+.scan { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.scan-track { height: 6px; border-radius: 99px; background: var(--panel-2); overflow: hidden; }
+.scan-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width .4s; }
+.sector-chips { margin: 12px 0 16px; }
+.chip-count { opacity: .7; font-variant-numeric: tabular-nums; margin-left: 2px; }
+.sector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 14px; align-items: start; }
+.sector-card { background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; min-width: 0; }
+.sector-card h3 { margin: 0 0 8px; }
+.closest-label { margin: 8px 0 2px; }
+.top-row { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: 8px; padding: 8px; }
+.top-row:hover { background: var(--panel); }
+.top-row-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.top-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.top-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.rec-bar.slim { height: 6px; border-radius: 99px; }
+.rec-bar.slim span { min-width: 3px; }
+.rating { flex-shrink: 0; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--border); color: var(--text); white-space: nowrap; }
+.rating::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; background: var(--muted); }
+.rating-strong-buy::before { background: #16a34a; }
+.rating-buy::before { background: #4ade80; }
+.rating-hold::before { background: #facc15; }
+.rating-sell::before { background: #f87171; }
+.rating-strong-sell::before { background: #dc2626; }
+@media (prefers-reduced-motion: reduce) { .scan-fill { transition: none; } }
+
+/* ---------------------------------------------------------------------------
+   Small screens: nothing may be wider than the page.
+   --------------------------------------------------------------------------- */
+
+/* Tab groups never push the page wider: they shrink to the space available and,
+   as a last resort, scroll sideways inside themselves. */
+.tabs { max-width: 100%; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button { white-space: nowrap; flex-shrink: 0; }
+
+.panel-head { flex-wrap: wrap; }
+.sector-grid { grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
+.top-row-head, .top-meta { min-width: 0; }
+.top-meta { flex-wrap: wrap; }
+
+@media (max-width: 700px) {
+  /* Header: row 1 = name + currency switch, row 2 = search, row 3 = full-width tabs */
+  .topbar { gap: 10px; }
+  .brand { order: 1; }
+  .brand h1 { font-size: 16px; }
+  .currency-switch { order: 2; margin-left: auto; }
+  .search { order: 3; flex-basis: 100%; min-width: 0; max-width: none; }
+  .topbar nav.tabs { order: 4; flex-basis: 100%; margin-left: 0; }
+  .topbar nav.tabs button { flex: 1 0 auto; padding: 8px 6px; font-size: 13px; text-align: center; }
+
+  /* Tab groups inside panels (e.g. the region switch) wrap onto more lines */
+  .panel .tabs { flex-wrap: wrap; overflow-x: visible; margin-left: 0; }
+  .panel .tabs button { flex: 1 0 auto; padding: 6px 10px; font-size: 13px; }
+  .panel-head .btn-row { width: 100%; justify-content: space-between; }
+
+  .watchlist { gap: 6px; }
+  .sector-chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .sector-chips::-webkit-scrollbar { display: none; }
+  .sector-chips .chip { flex-shrink: 0; }
+
+  .quote-row { gap: 8px; }
+  .feed { margin-left: 0; flex-basis: 100%; }
+  .fx-note { white-space: normal; }
+  .detail-title h2 { font-size: 15px; }
+  .position-hero { gap: 20px; }
+  .hero-value { font-size: 22px; }
+}
+
+/* Safety net: a stray wide element must not make the whole page scroll sideways. */
+html, body { max-width: 100%; overflow-x: hidden; }

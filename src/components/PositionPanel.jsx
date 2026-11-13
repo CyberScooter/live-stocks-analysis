@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Section from './Section.jsx';
 import { money, num, pct, signed, tone } from '../format.js';
 import { heldFor, positionStats, projectionStats } from '../positions.js';
@@ -8,13 +8,16 @@ const currencyHint = (c) =>
 
 export default function PositionPanel({ symbol, position, price, currency, conv, buyRate, onSave, onRemove }) {
   const [editing, setEditing] = useState(false);
+  // What-if target price: typed here, never saved with the position.
+  const [target, setTarget] = useState('');
+  useEffect(() => setTarget(''), [symbol]);
   const mismatch = position?.currency && currency && position.currency !== currency;
   // In GBP mode: price converted at today's rate, cost at the rate on the buy date
   // (today's rate if no date was entered, so currency moves aren't included).
   const display = conv?.converted ? conv : { rate: 1, currency, converted: false };
   const rateBuy = display.converted ? (position?.date && buyRate) || display.rate : 1;
   const stats = mismatch ? null : positionStats(position, price, display.rate, rateBuy);
-  const proj = mismatch ? null : projectionStats(position, price, display.rate, rateBuy);
+  const proj = mismatch ? null : projectionStats(position, target === '' ? null : Number(target), price, display.rate, rateBuy);
   const dc = display.currency;
   const isPence = currency === 'GBp' || currency === 'GBX'; // pence -> pounds is just /100, no FX
   const fxKnown = display.converted && !isPence && position?.date && buyRate;
@@ -121,11 +124,17 @@ export default function PositionPanel({ symbol, position, price, currency, conv,
 
           <div className="projection">
             <h3 className="sub-title">Price projection</h3>
+            <label className="target-field">
+              <span>Target price {currencyHint(currency) && <span className="muted">({currencyHint(currency).split(',')[0]})</span>}</span>
+              <input
+                type="number" step="any" min="0" inputMode="decimal" placeholder={price != null ? String(price) : ''}
+                value={target} onChange={(e) => setTarget(e.target.value)}
+              />
+            </label>
             {!proj ? (
-              <div className="empty-position">
-                <p className="muted">Set a target price to see the profit you’d make if {symbol} gets there.</p>
-                <button className="ghost-btn" onClick={() => setEditing(true)}>+ Add target price</button>
-              </div>
+              <p className="muted small">
+                Type a price to see the profit you’d make if {symbol} gets there. It isn’t saved.
+              </p>
             ) : (
               <>
                 <div className="position-hero">
@@ -191,7 +200,6 @@ function PositionForm({ initial, currency, onSubmit, onCancel }) {
   const [price, setPrice] = useState(initial?.price ?? '');
   const [shares, setShares] = useState(initial?.shares ?? '');
   const [date, setDate] = useState(initial?.date ?? '');
-  const [target, setTarget] = useState(initial?.target ?? '');
   const [error, setError] = useState(null);
   const today = new Date().toISOString().slice(0, 10);
 
@@ -202,9 +210,7 @@ function PositionForm({ initial, currency, onSubmit, onCancel }) {
     if (!(p > 0)) return setError('Enter the price you paid per share.');
     if (s != null && !(s > 0)) return setError('Shares must be more than 0, or leave it empty.');
     if (date && date > today) return setError('Buy date can’t be in the future.');
-    const t = target === '' ? null : Number(target);
-    if (t != null && !(t > 0)) return setError('Target price must be more than 0, or leave it empty.');
-    onSubmit({ price: p, shares: s, date: date || null, target: t });
+    onSubmit({ price: p, shares: s, date: date || null });
   };
 
   return (
@@ -225,12 +231,6 @@ function PositionForm({ initial, currency, onSubmit, onCancel }) {
         <span>Buy date (optional)</span>
         <input type="date" max={today} value={date} onChange={(e) => setDate(e.target.value)} />
         <small className="muted">Used for holding time and yearly return.</small>
-      </label>
-      <label>
-        <span>Target price (optional)</span>
-        <input type="number" step="any" min="0" inputMode="decimal" value={target}
-          onChange={(e) => setTarget(e.target.value)} />
-        <small className="muted">{currencyHint(currency)}. Shows the profit you’d make if it gets there.</small>
       </label>
       {error && <p className="error-text small">{error}</p>}
       <div className="btn-row">

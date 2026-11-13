@@ -7,4 +7,12 @@ export default defineConfig({
     port: 5173,
     proxy: { '/api': 'http://localhost:5174' },
   },
+  // `npm test`: component tests run in a simulated browser (jsdom), no network.
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.js'],
+    include: ['src/**/*.test.{js,jsx}'],
+    css: false,
+    restoreMocks: false,
+  },
 });

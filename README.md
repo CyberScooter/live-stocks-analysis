@@ -43,6 +43,16 @@ npm run dev              # open http://localhost:5173
 
 For a production build, run `npm run build && npm start`. One server then handles both the app and the API on port 5174.
 
+## Strong buys
+
+The **Strong buys** tab ranks 344 large companies worldwide (110 US, 80 European, 76 Asian and 78 from the rest of the world, across the 11 market sectors) by analyst consensus and shows the strong buys per sector. Filter by region (Worldwide / US / Europe / Asia / Rest of world) and sector. "Rest of world" is Canada, Latin America, Australia, the Middle East and Africa. Click a stock to open it.
+
+- Ratings come from Finnhub's analyst recommendations (how many analysts say strong buy, buy, hold, sell), which update about monthly. "Strong buy" means an average of 4.2 or more out of 5.
+- Finnhub's free plan has no whole-market screener, so the list of companies is fixed in [server/topRated.js](server/topRated.js). Edit it to add or swap stocks.
+- Companies outside the US are listed by their US ticker (e.g. `SHEL`, `LVMUY`, `TSM`, `TCEHY`), because the free plan has no analyst data for foreign exchange tickers. They open with a price in dollars.
+- The server checks the list slowly in the background (about 9 minutes the first time, US stocks first) to stay within the free request limit, then reuses the results for 12 hours.
+- Analyst ratings are opinions, not advice.
+
 ## Currency (Local / £ GBP)
 
 The switch in the header shows amounts either in each stock's own trading currency or converted to GBP. Exchange rates come from Yahoo and refresh every 5 minutes.
@@ -68,6 +78,25 @@ The app always shows the newest of three sources:
 | Yahoo chart data | All markets | ~1 min, some exchanges delayed 15–20 min |
 
 The badge next to the price shows **Live** when trades are streaming. Outside market hours no trades arrive, so the price stays at the last close. The free plan allows up to 50 streamed symbols and one stream connection per key.
+
+## Tests
+
+```bash
+npm test            # run everything once
+npm run test:watch  # re-run on every change
+```
+
+The tests use Vitest and React Testing Library. They render each tab in a simulated browser with fake API responses, so they need no API key and make no network requests.
+
+| File | Covers |
+|---|---|
+| [src/components/StockView.test.jsx](src/components/StockView.test.jsx) | Stock tab: price, performance periods, chart, news, live prices, your position, £ GBP |
+| [src/components/MyStocks.test.jsx](src/components/MyStocks.test.jsx) | My stocks tab: table, totals per currency and in £, live prices, import/export |
+| [src/components/TopRated.test.jsx](src/components/TopRated.test.jsx) | Strong buys tab: sectors, region and sector filters, progress while checking |
+| [src/components/MarketNews.test.jsx](src/components/MarketNews.test.jsx) | Market news tab: headlines, filtering by stock |
+| [src/App.test.jsx](src/App.test.jsx) | Switching tabs, search, watchlist, saving a position |
+
+Shared fake data is in [src/test/fixtures.js](src/test/fixtures.js). The server ([server/](server/)) has no automated tests yet.
 
 ## Hosting
 
